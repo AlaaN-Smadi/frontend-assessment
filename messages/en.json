@@ -1,0 +1,41 @@
+{
+  "common": {
+    "appName": "Team Directory"
+  },
+  "navigation": {
+    "teamDirectory": "Team Directory"
+  },
+  "teamDirectory": {
+    "metadata": {
+      "title": "Team Directory",
+      "description": "Browse team members"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by name...",
+      "roleFilter": "Filter by role",
+      "clearFilters": "Clear all"
+    },
+    "emptyState": "No team members found",
+    "loadMore": "Load more",
+    "table": {
+      "avatar": "Avatar",
+      "name": "Name",
+      "role": "Role",
+      "email": "Email"
+    },
+    "roles": {
+      "all": "All roles",
+      "admin": "Admin",
+      "agent": "Agent",
+      "creator": "Creator"
+    },
+    "pagination": {
+      "page": "Page {page} of {totalPages}"
+    },
+    "errors": {
+      "generic": "Something went wrong while loading team members.",
+      "retry": "Try again"
+    }
+  }
+}
+

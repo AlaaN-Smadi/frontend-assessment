@@ -1,0 +1,41 @@
+{
+  "common": {
+    "appName": "دليل الفريق"
+  },
+  "navigation": {
+    "teamDirectory": "دليل الفريق"
+  },
+  "teamDirectory": {
+    "metadata": {
+      "title": "دليل الفريق",
+      "description": "تصفح أعضاء الفريق"
+    },
+    "filters": {
+      "searchPlaceholder": "ابحث بالاسم...",
+      "roleFilter": "تصفية حسب الدور",
+      "clearFilters": "إعادة التعيين"
+    },
+    "emptyState": "لا يوجد أعضاء مطابقون",
+    "loadMore": "تحميل المزيد",
+    "table": {
+      "avatar": "الصورة",
+      "name": "الاسم",
+      "role": "الدور",
+      "email": "البريد الإلكتروني"
+    },
+    "roles": {
+      "all": "كل الأدوار",
+      "admin": "مسؤول",
+      "agent": "وكيل",
+      "creator": "منشئ"
+    },
+    "pagination": {
+      "page": "الصفحة {page} من {totalPages}"
+    },
+    "errors": {
+      "generic": "حدث خطأ أثناء تحميل أعضاء الفريق.",
+      "retry": "حاول مرة أخرى"
+    }
+  }
+}
+

@@ -4,6 +4,15 @@
 
 Your task is to build a **"Team Directory"** feature that displays a **paginated, filterable list of team members**.
 
+- ✅ **Implementation status:** A Next.js 14 App Router project has been scaffolded with TypeScript, Tailwind (including RTL support), next-intl, Apollo Client (backed by a mock GraphQL API), Zustand, and TanStack Table. The `/team-directory` route delivers the required filtering, sorting, pagination, and responsive UI.
+- 🚀 **Run locally:**
+  ```bash
+  npm install
+  npm run dev
+  ```
+  Then open `http://localhost:3000`.
+- 🌐 **Available locales:** English (`/en`) and Arabic (`/ar`). Navigation automatically redirects to the default locale.
+
 - **Estimated Time:** 6–10 hours (spread over 2–3 days)  
 - **Difficulty:** Intermediate  
 - **Goal:** Evaluate your ability to implement a production-quality feature following best practices in **React, Next.js, TypeScript, GraphQL, Zustand, and TanStack Table**.
