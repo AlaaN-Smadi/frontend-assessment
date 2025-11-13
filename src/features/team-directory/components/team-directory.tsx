@@ -23,6 +23,7 @@ export function TeamDirectory() {
   const sortOrder = useTeamDirectoryStore((state) => state.sortOrder);
   const setPage = useTeamDirectoryStore((state) => state.setPage);
   const setPagination = useTeamDirectoryStore((state) => state.setPagination);
+  const resetFilters = useTeamDirectoryStore((state) => state.resetFilters);
 
   const debouncedSearch = useDebouncedValue(searchTerm, 300);
 
@@ -114,48 +115,120 @@ export function TeamDirectory() {
   const isFetching =
     query.networkStatus === NetworkStatus.refetch ||
     query.networkStatus === NetworkStatus.setVariables;
-    
-    console.log(query.error);
-    
   const isError = Boolean(query.error);
 
+  const totalMembers =
+    pageInfo.totalItems ||
+    query.data?.teamMembers.pageInfo?.totalItems ||
+    members.length ||
+    gridMembers.length ||
+    0;
+
+  const uniqueRoles = new Set(
+    [...members, ...gridMembers].map((member) => member.role)
+  ).size;
+
   return (
-    <div className="flex flex-col gap-6">
-      <header className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground lg:text-3xl">
-          {t('metadata.title')}
-        </h1>
-        <p className="text-muted-foreground">{t('metadata.description')}</p>
-      </header>
+    <div className="space-y-10">
+      <section className="relative overflow-hidden rounded-3xl border border-white/60 bg-white/80 p-8 shadow-2xl shadow-blue-500/10 backdrop-blur-2xl transition dark:border-slate-800/80 dark:bg-slate-900/70 dark:shadow-black/30 sm:p-10">
+        <div className="pointer-events-none absolute -left-24 top-4 h-72 w-72 rounded-full bg-blue-500/20 blur-3xl dark:bg-blue-500/25" />
+        <div className="pointer-events-none absolute -right-12 -bottom-6 h-80 w-80 rounded-full bg-cyan-400/25 blur-3xl dark:bg-cyan-500/20" />
 
-      <TeamFilters />
+        <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+          <div className="space-y-6">
+            <span className="inline-flex items-center gap-2 rounded-full border border-blue-200/60 bg-blue-50/80 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-blue-600 shadow-sm dark:border-blue-500/40 dark:bg-blue-500/15 dark:text-blue-200">
+              {t('hero.chip')}
+            </span>
+            <div className="space-y-4">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+                {t('hero.title')}
+              </h1>
+              <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
+                {t('hero.subtitle')}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-3 rounded-2xl border border-blue-200/70 bg-white/70 px-4 py-3 text-sm shadow-md dark:border-blue-500/40 dark:bg-blue-500/10">
+                <span className="text-3xl font-bold text-foreground">
+                  {totalMembers > 0 ? totalMembers : '—'}
+                </span>
+                <span className="text-sm font-semibold text-muted-foreground">
+                  {t('hero.stats.members', {count: totalMembers})}
+                </span>
+              </div>
+              <div className="flex items-center gap-3 rounded-2xl border border-slate-200/70 bg-white/70 px-4 py-3 text-sm shadow-md dark:border-slate-700/60 dark:bg-slate-900/60">
+                <span className="text-2xl font-semibold text-foreground">
+                  {uniqueRoles > 0 ? uniqueRoles : '—'}
+                </span>
+                <span className="text-sm font-semibold text-muted-foreground">
+                  {t('hero.stats.roles', {count: uniqueRoles})}
+                </span>
+              </div>
+            </div>
+          </div>
 
-      <section className="block lg:hidden">
-        <TeamGrid members={gridMembers} isLoading={isInitialLoading && currentPage === 1} />
-        {isError ? (
-          <p className="mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-            {t('errors.generic')}
-          </p>
-        ) : null}
-        {pageInfo.hasNextPage ? (
-          <div className="mt-4 flex justify-center">
-            <Button onClick={() => handlePageChange(currentPage + 1)} disabled={isFetching}>
-              {isFetching ? `${t('loadMore')}...` : t('loadMore')}
+          <div className="hidden flex-col items-end gap-4 text-right lg:flex">
+            <p className="text-sm font-medium text-muted-foreground">
+              {t('pagination.page', {
+                page: pageInfo.currentPage,
+                totalPages: pageInfo.totalPages || 1
+              })}
+            </p>
+            <Button
+              onClick={() => {
+                resetFilters();
+                handlePageChange(1);
+              }}
+              disabled={isFetching}
+            >
+              {t('hero.cta')}
             </Button>
           </div>
-        ) : null}
+        </div>
+
+        <div className="relative mt-8">
+          <TeamFilters />
+        </div>
       </section>
 
-      <section className="hidden lg:block">
-        <TeamTable
-          data={members}
-          isLoading={isInitialLoading}
-          isFetching={isFetching}
-          isError={isError}
-          onRetry={() => query.refetch(variables)}
-          pageInfo={pageInfo}
-          onPageChange={handlePageChange}
-        />
+      <section className="space-y-8">
+        <div className="block lg:hidden">
+          <TeamGrid members={gridMembers} isLoading={isInitialLoading && currentPage === 1} />
+
+          {isError ? (
+            <p className="mt-4 rounded-2xl border border-red-200/70 bg-red-50/70 px-4 py-3 text-sm font-medium text-red-700 shadow-sm dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200">
+              {t('errors.generic')}
+            </p>
+          ) : null}
+
+          {pageInfo.hasNextPage ? (
+            <div className="mt-5 flex justify-center">
+              <Button
+                variant="secondary"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={isFetching}
+              >
+                {isFetching ? `${t('loadMore')}...` : t('loadMore')}
+              </Button>
+            </div>
+          ) : null}
+
+          <p className="mt-6 text-center text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground">
+            {t('view.mobileHint')}
+          </p>
+        </div>
+
+        <div className="hidden lg:block">
+          <TeamTable
+            data={members}
+            isLoading={isInitialLoading}
+            isFetching={isFetching}
+            isError={isError}
+            onRetry={() => query.refetch(variables)}
+            pageInfo={pageInfo}
+            onPageChange={handlePageChange}
+          />
+        </div>
       </section>
     </div>
   );

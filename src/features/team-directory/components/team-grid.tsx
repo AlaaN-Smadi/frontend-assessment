@@ -16,17 +16,20 @@ export function TeamGrid({members, isLoading}: TeamGridProps) {
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
         {Array.from({length: 6}).map((_, index) => (
-          <div key={index} className="rounded-xl border border-border bg-card p-4 shadow-sm">
+          <div
+            key={index}
+            className="glass-panel flex flex-col gap-4 rounded-3xl p-6 shadow-lg shadow-blue-500/10"
+          >
             <div className="flex items-center gap-4">
               <Skeleton className="h-16 w-16 rounded-full" />
               <div className="flex-1 space-y-2">
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-3 w-40" />
+                <Skeleton className="h-4 w-32 rounded-full" />
+                <Skeleton className="h-3 w-40 rounded-full" />
               </div>
             </div>
-            <Skeleton className="mt-4 h-6 w-20 rounded-full" />
+            <Skeleton className="h-8 w-28 rounded-full" />
           </div>
         ))}
       </div>
@@ -35,14 +38,14 @@ export function TeamGrid({members, isLoading}: TeamGridProps) {
 
   if (!members.length) {
     return (
-      <div className="rounded-lg border border-dashed border-border px-6 py-10 text-center text-muted-foreground">
+      <div className="rounded-3xl border border-dashed border-border/70 px-8 py-12 text-center text-muted-foreground shadow-sm">
         {t('emptyState')}
       </div>
     );
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
       {members.map((member) => (
         <TeamMemberCard key={member.id} member={member} />
       ))}

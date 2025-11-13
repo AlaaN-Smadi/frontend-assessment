@@ -6,6 +6,7 @@ import type {ReactNode} from 'react';
 
 import '../globals.css';
 import {AppProviders} from '../../components/providers/app-providers';
+import {SiteHeader} from '../../components/layout/site-header';
 import type {AppLocale} from '../../src/i18n/request';
 import {i18n} from '../../src/i18n/request';
 
@@ -61,7 +62,15 @@ export default async function LocaleLayout({children, params}: LayoutProps) {
   return (
     <body className={`min-h-screen bg-background ${inter.variable}`} data-locale={locale}>
       <NextIntlClientProvider locale={locale} messages={messages}>
-        <AppProviders>{children}</AppProviders>
+        <AppProviders>
+          <div className="relative min-h-screen bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.15),transparent_55%)] dark:bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.25),rgba(2,6,23,0.9)_60%)]">
+            <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(120deg,_rgba(59,130,246,0.12),rgba(14,165,233,0.08)_40%,transparent_70%)] dark:bg-[linear-gradient(120deg,_rgba(59,130,246,0.15),rgba(14,165,233,0.1)_45%,rgba(2,6,23,0.95)_80%)]" />
+            <SiteHeader />
+            <main className="relative mx-auto w-full max-w-6xl px-4 pb-16 pt-10 sm:px-6 lg:px-8 xl:px-10">
+              {children}
+            </main>
+          </div>
+        </AppProviders>
       </NextIntlClientProvider>
     </body>
   );

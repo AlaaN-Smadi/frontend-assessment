@@ -38,47 +38,60 @@ export function TeamFilters() {
   );
 
   return (
-    <section className="flex flex-col gap-4 rounded-lg border border-border bg-card/80 p-4 shadow-sm lg:flex-row lg:items-end lg:justify-between">
-      <div className="flex w-full flex-col gap-2 lg:flex-1">
-        <Label htmlFor="team-search" className="text-sm font-medium text-muted-foreground">
-          {tFilters('searchPlaceholder')}
-        </Label>
-        <div className="relative flex items-center">
-          <Search className="pointer-events-none absolute inset-y-0 start-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            id="team-search"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder={tFilters('searchPlaceholder')}
-            className="ps-9"
-          />
+    <section className="glass-panel relative overflow-hidden p-6 sm:p-8">
+      <div className="pointer-events-none absolute -left-10 top-3 h-32 w-32 rounded-full bg-blue-500/10 blur-2xl dark:bg-blue-400/20" />
+      <div className="pointer-events-none absolute -right-14 bottom-0 h-36 w-36 rounded-full bg-cyan-400/10 blur-3xl dark:bg-cyan-500/10" />
+
+      <div className="relative grid gap-6 lg:grid-cols-12 lg:items-end">
+        <div className="lg:col-span-5">
+          <Label htmlFor="team-search" className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            {tFilters('searchPlaceholder')}
+          </Label>
+          <div className="mt-2 relative flex items-center">
+            <Search className="pointer-events-none absolute inset-y-0 start-4 h-4 w-4 text-muted-foreground top-4" />
+            <Input
+              id="team-search"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder={tFilters('searchPlaceholder')}
+              className="h-12 rounded-full border border-transparent bg-white/80 ps-11 text-sm shadow-inner shadow-blue-500/5 transition focus:border-blue-400 focus:bg-white focus-visible:ring-blue-500 dark:bg-slate-900/70"
+            />
+          </div>
         </div>
-      </div>
 
-      <div className="flex w-full flex-col gap-2 lg:max-w-xs">
-        <Label htmlFor="role-filter" className="text-sm font-medium text-muted-foreground">
-          {tFilters('roleFilter')}
-        </Label>
-        <Select value={role} onValueChange={handleRoleChange}>
-          <SelectTrigger id="role-filter">
-            <SelectValue placeholder={tFilters('roleFilter')} />
-          </SelectTrigger>
-          <SelectContent>
-            {ROLE_OPTIONS.map((option) => (
-              <SelectItem key={option} value={option}>
-                {option === 'ALL'
-                  ? tRoles('all')
-                  : tRoles(option.toLowerCase() as 'admin' | 'agent' | 'creator')}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+        <div className="lg:col-span-4">
+          <Label htmlFor="role-filter" className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            {tFilters('roleFilter')}
+          </Label>
+          <div className="mt-2">
+            <Select value={role} onValueChange={handleRoleChange}>
+              <SelectTrigger
+                id="role-filter"
+                className="h-12 rounded-full border border-transparent bg-white/80 text-sm font-medium shadow-inner shadow-blue-500/5 transition hover:border-blue-300 focus:border-blue-400 focus:bg-white focus-visible:ring-blue-500 dark:bg-slate-900/70"
+              >
+                <SelectValue placeholder={tFilters('roleFilter')} />
+              </SelectTrigger>
+              <SelectContent>
+                {ROLE_OPTIONS.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option === 'ALL'
+                      ? tRoles('all')
+                      : tRoles(option.toLowerCase() as 'admin' | 'agent' | 'creator')}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
-      <div className="flex w-full justify-end lg:w-auto">
-        <Button variant="outline" onClick={resetFilters} className="w-full lg:w-auto">
-          {tFilters('clearFilters')}
-        </Button>
+        <div className="flex flex-col items-end gap-2 lg:col-span-3">
+          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            &nbsp;
+          </span>
+          <Button variant="ghost" size="sm" onClick={resetFilters} className="w-full rounded-full border border-border/60 bg-white/70 text-sm font-semibold text-muted-foreground hover:border-blue-400 hover:text-blue-500 dark:bg-slate-900/70">
+            {tFilters('clearFilters')}
+          </Button>
+        </div>
       </div>
     </section>
   );

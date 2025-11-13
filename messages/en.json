@@ -10,6 +10,16 @@
       "title": "Team Directory",
       "description": "Browse team members"
     },
+    "hero": {
+      "chip": "People Experience",
+      "title": "Discover the people who power our teams",
+      "subtitle": "Search, filter, and connect with every teammate in seconds.",
+      "cta": "Reset filters",
+      "stats": {
+        "members": "{count, plural, one {# member} other {# members}}",
+        "roles": "{count, plural, one {# role} other {# roles}}"
+      }
+    },
     "filters": {
       "searchPlaceholder": "Search by name...",
       "roleFilter": "Filter by role",
@@ -35,6 +45,9 @@
     "errors": {
       "generic": "Something went wrong while loading team members.",
       "retry": "Try again"
+    },
+    "view": {
+      "mobileHint": "Switch to desktop to explore the interactive table view."
     }
   }
 }

@@ -13,7 +13,7 @@ export default async function RootLayout({children}: {children: ReactNode}) {
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
 
   return (
-    <html lang={locale} dir={dir} suppressHydrationWarning>
+    <html lang={locale} dir={dir} suppressHydrationWarning className="light" data-theme="light">
       {children}
     </html>
   );
