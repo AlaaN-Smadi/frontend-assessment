@@ -22,6 +22,7 @@ interface TeamDirectoryActions {
   setPage: (page: number) => void;
   setLimit: (limit: number) => void;
   setSort: (sortBy: SortField, sortOrder: SortOrder) => void;
+  unsafeHydrate: (payload: Partial<TeamDirectoryState>) => void;
   setPagination: (payload: {totalPages: number; totalItems: number}) => void;
   resetFilters: () => void;
 }
@@ -64,6 +65,11 @@ export const useTeamDirectoryStore = create<TeamDirectoryStore>((set) => ({
       sortOrder,
       currentPage: 1
     }),
+  unsafeHydrate: (payload) =>
+    set((state) => ({
+      ...state,
+      ...payload
+    })),
   setPagination: ({totalPages, totalItems}) =>
     set({
       totalPages,

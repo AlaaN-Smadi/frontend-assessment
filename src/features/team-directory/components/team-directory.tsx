@@ -1,19 +1,42 @@
 'use client';
 
 import {NetworkStatus} from '@apollo/client';
+import type {Route} from 'next';
 import {useTranslations} from 'next-intl';
 import {useEffect, useMemo, useRef, useState} from 'react';
+import {usePathname, useRouter, useSearchParams} from 'next/navigation';
 
 import {Button} from '../../../../components/ui/button';
 import {useDebouncedValue} from '../../../hooks/use-debounced-value';
 import {useTeamDirectoryStore} from '../../../stores/team-directory-store';
+import type {RoleFilter, SortField, SortOrder} from '../../../stores/team-directory-store';
 import {TeamGrid} from './team-grid';
 import {TeamFilters} from './team-filters';
 import {TeamTable} from './team-table';
 import {useTeamMembers} from '../hooks/use-team-members';
 
+const ROLE_QUERY_MAP: Record<string, RoleFilter> = {
+  all: 'ALL',
+  admin: 'ADMIN',
+  agent: 'AGENT',
+  creator: 'CREATOR'
+};
+
+const SORT_FIELD_QUERY_MAP: Record<string, SortField> = {
+  name: 'NAME',
+  role: 'ROLE'
+};
+
+const SORT_ORDER_QUERY_MAP: Record<string, SortOrder> = {
+  asc: 'ASC',
+  desc: 'DESC'
+};
+
 export function TeamDirectory() {
   const t = useTranslations('teamDirectory');
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const searchTerm = useTeamDirectoryStore((state) => state.searchTerm);
   const role = useTeamDirectoryStore((state) => state.role);
@@ -21,9 +44,15 @@ export function TeamDirectory() {
   const limit = useTeamDirectoryStore((state) => state.limit);
   const sortBy = useTeamDirectoryStore((state) => state.sortBy);
   const sortOrder = useTeamDirectoryStore((state) => state.sortOrder);
+  const setSearchTerm = useTeamDirectoryStore((state) => state.setSearchTerm);
+  const setRole = useTeamDirectoryStore((state) => state.setRole);
   const setPage = useTeamDirectoryStore((state) => state.setPage);
   const setPagination = useTeamDirectoryStore((state) => state.setPagination);
   const resetFilters = useTeamDirectoryStore((state) => state.resetFilters);
+  const unsafeHydrate = useTeamDirectoryStore((state) => state.unsafeHydrate);
+
+  const hasSyncedFromQuery = useRef(false);
+  const lastQueryRef = useRef('');
 
   const debouncedSearch = useDebouncedValue(searchTerm, 300);
 
@@ -157,6 +186,89 @@ export function TeamDirectory() {
   const overlayActive = showFetchingOverlay || isFetching;
   const isGridView = viewMode === 'grid';
 
+  useEffect(() => {
+    const currentParams = searchParams.toString();
+
+    if (hasSyncedFromQuery.current && currentParams === lastQueryRef.current) {
+      return;
+    }
+
+    const params = new URLSearchParams(currentParams);
+    const search = params.get('search') ?? '';
+    const roleParam = params.get('role')?.toLowerCase();
+    const nextRole = roleParam ? ROLE_QUERY_MAP[roleParam] ?? 'ALL' : 'ALL';
+    const sortFieldParam = params.get('sort')?.toLowerCase();
+    const sortOrderParam = params.get('order')?.toLowerCase();
+
+    const nextSort = SORT_FIELD_QUERY_MAP[sortFieldParam ?? ''] ?? 'NAME';
+    const nextOrder = SORT_ORDER_QUERY_MAP[sortOrderParam ?? ''] ?? 'ASC';
+
+    const {
+      searchTerm: currentSearchTerm,
+      role: currentRole,
+      sortBy: currentSortBy,
+      sortOrder: currentSortOrder
+    } = useTeamDirectoryStore.getState();
+
+    if (search !== currentSearchTerm) {
+      setSearchTerm(search);
+    }
+
+    if (nextRole !== currentRole) {
+      setRole(nextRole);
+    }
+
+    if (nextSort !== currentSortBy || nextOrder !== currentSortOrder) {
+      unsafeHydrate({sortBy: nextSort, sortOrder: nextOrder});
+    }
+
+    hasSyncedFromQuery.current = true;
+    lastQueryRef.current = params.toString();
+  }, [searchParams, setRole, setSearchTerm, unsafeHydrate]);
+
+  useEffect(() => {
+    if (!hasSyncedFromQuery.current) {
+      return;
+    }
+
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (searchTerm) {
+      params.set('search', searchTerm);
+    } else {
+      params.delete('search');
+    }
+
+    if (role !== 'ALL') {
+      params.set('role', role.toLowerCase());
+    } else {
+      params.delete('role');
+    }
+
+    if (sortBy !== 'NAME') {
+      params.set('sort', sortBy.toLowerCase());
+    } else {
+      params.delete('sort');
+    }
+
+    if (sortOrder !== 'ASC') {
+      params.set('order', sortOrder.toLowerCase());
+    } else {
+      params.delete('order');
+    }
+
+    const next = params.toString();
+
+    if (next === lastQueryRef.current) {
+      return;
+    }
+
+    lastQueryRef.current = next;
+
+    const query = next ? `?${next}` : '';
+    router.replace(`${pathname}${query}` as Route, {scroll: false});
+  }, [pathname, role, router, searchParams, searchTerm, sortBy, sortOrder]);
+
   return (
     <div className="space-y-10">
       <section className="relative overflow-hidden rounded-3xl border border-white/60 bg-white/80 p-8 shadow-2xl shadow-blue-500/10 backdrop-blur-2xl transition dark:border-slate-800/80 dark:bg-slate-900/70 dark:shadow-black/30 sm:p-10">
@@ -264,9 +376,9 @@ export function TeamDirectory() {
                 <Button
                   variant="secondary"
                   onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={isFetching}
+                  disabled={overlayActive}
                 >
-                  {isFetching ? t('loading') : t('loadMore')}
+                  {overlayActive ? t('loading') : t('loadMore')}
                 </Button>
               </div>
             ) : null}

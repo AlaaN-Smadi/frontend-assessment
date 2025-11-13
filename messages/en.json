@@ -52,6 +52,13 @@
       "grid": "Grid view",
       "table": "Table view",
       "toggleLabel": "Display mode"
+    },
+    "gridSort": {
+      "label": "Sort",
+      "nameAsc": "Name (A–Z)",
+      "nameDesc": "Name (Z–A)",
+      "roleAsc": "Role (A–Z)",
+      "roleDesc": "Role (Z–A)"
     }
   }
 }
