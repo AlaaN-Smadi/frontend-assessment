@@ -1,11 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import {useEffect, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 
 import {cn} from '../lib/utils';
-
-const FALLBACK_AVATAR = '/images/avatar-fallback.svg';
 
 type AvatarImageProps = {
   src: string;
@@ -16,11 +14,32 @@ type AvatarImageProps = {
 };
 
 export function AvatarImage({src, alt, size, className, imageClassName}: AvatarImageProps) {
-  const [imageSrc, setImageSrc] = useState(src || FALLBACK_AVATAR);
+  const [showInitials, setShowInitials] = useState(!src);
 
   useEffect(() => {
-    setImageSrc(src || FALLBACK_AVATAR);
+    setShowInitials(!src);
   }, [src]);
+
+  const initials = useMemo(() => {
+    if (!alt) {
+      return '?';
+    }
+
+    const parts = alt.trim().split(/\s+/).filter(Boolean);
+
+    if (!parts.length) {
+      return '?';
+    }
+
+    if (parts.length === 1) {
+      return parts[0].charAt(0).toUpperCase();
+    }
+
+    const first = parts[0].charAt(0);
+    const last = parts[parts.length - 1].charAt(0);
+
+    return `${first}${last}`.toUpperCase();
+  }, [alt]);
 
   return (
     <div
@@ -30,14 +49,21 @@ export function AvatarImage({src, alt, size, className, imageClassName}: AvatarI
       )}
       style={{width: size, height: size}}
     >
-      <Image
-        src={imageSrc}
-        alt={alt}
-        fill
-        sizes={`${size}px`}
-        className={cn('object-cover', imageClassName)}
-        onError={() => setImageSrc(FALLBACK_AVATAR)}
-      />
+      {showInitials ? (
+        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-500/20 via-blue-400/30 to-cyan-400/20 text-lg font-semibold uppercase text-blue-900 dark:text-blue-100">
+          <span aria-hidden="true">{initials}</span>
+          <span className="sr-only">{alt}</span>
+        </div>
+      ) : (
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes={`${size}px`}
+          className={cn('object-cover', imageClassName)}
+          onError={() => setShowInitials(true)}
+        />
+      )}
     </div>
   );
 }
