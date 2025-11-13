@@ -32,6 +32,8 @@ const SORT_ORDER_QUERY_MAP: Record<string, SortOrder> = {
   desc: 'DESC'
 };
 
+const VIEW_MODE_STORAGE_KEY = 'team-directory-view-mode';
+
 export function TeamDirectory() {
   const t = useTranslations('teamDirectory');
   const router = useRouter();
@@ -84,6 +86,53 @@ export function TeamDirectory() {
     hasPreviousPage: false,
     totalItems: 0
   };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const storedView = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY);
+
+    if (storedView === 'grid' || storedView === 'table') {
+      userSelectedView.current = true;
+      setViewMode(storedView);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia('(min-width: 1024px)');
+
+    const applyPreferredView = () => {
+      if (!userSelectedView.current) {
+        setViewMode(mediaQuery.matches ? 'table' : 'grid');
+      }
+    };
+
+    applyPreferredView();
+
+    const listener = (event: MediaQueryListEvent) => {
+      if (!userSelectedView.current) {
+        setViewMode(event.matches ? 'table' : 'grid');
+      }
+    };
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', listener);
+      return () => {
+        mediaQuery.removeEventListener('change', listener);
+      };
+    }
+
+    mediaQuery.onchange = listener;
+    return () => {
+      mediaQuery.onchange = null;
+    };
+  }, []);
 
   useEffect(() => {
     if (query.data?.teamMembers.nodes) {
@@ -181,6 +230,9 @@ export function TeamDirectory() {
   const handleViewChange = (mode: 'grid' | 'table') => {
     userSelectedView.current = true;
     setViewMode(mode);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode);
+    }
   };
 
   const overlayActive = showFetchingOverlay || isFetching;
