@@ -42,6 +42,9 @@ export function TeamDirectory() {
   const query = useTeamMembers(variables);
 
   const [gridMembers, setGridMembers] = useState(query.data?.teamMembers.nodes ?? []);
+  const [showFetchingOverlay, setShowFetchingOverlay] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  const userSelectedView = useRef(false);
   const filterKeyRef = useRef<string>('');
 
   const members = query.data?.teamMembers.nodes ?? [];
@@ -128,6 +131,32 @@ export function TeamDirectory() {
     [...members, ...gridMembers].map((member) => member.role)
   ).size;
 
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+
+    if (isFetching) {
+      setShowFetchingOverlay(true);
+    } else {
+      timeout = setTimeout(() => {
+        setShowFetchingOverlay(false);
+      }, 500);
+    }
+
+    return () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    };
+  }, [isFetching]);
+
+  const handleViewChange = (mode: 'grid' | 'table') => {
+    userSelectedView.current = true;
+    setViewMode(mode);
+  };
+
+  const overlayActive = showFetchingOverlay || isFetching;
+  const isGridView = viewMode === 'grid';
+
   return (
     <div className="space-y-10">
       <section className="relative overflow-hidden rounded-3xl border border-white/60 bg-white/80 p-8 shadow-2xl shadow-blue-500/10 backdrop-blur-2xl transition dark:border-slate-800/80 dark:bg-slate-900/70 dark:shadow-black/30 sm:p-10">
@@ -191,44 +220,73 @@ export function TeamDirectory() {
         </div>
       </section>
 
-      <section className="space-y-8">
-        <div className="block lg:hidden">
-          <TeamGrid members={gridMembers} isLoading={isInitialLoading && currentPage === 1} />
-
-          {isError ? (
-            <p className="mt-4 rounded-2xl border border-red-200/70 bg-red-50/70 px-4 py-3 text-sm font-medium text-red-700 shadow-sm dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200">
-              {t('errors.generic')}
-            </p>
-          ) : null}
-
-          {pageInfo.hasNextPage ? (
-            <div className="mt-5 flex justify-center">
-              <Button
-                variant="secondary"
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={isFetching}
-              >
-                {isFetching ? `${t('loadMore')}...` : t('loadMore')}
-              </Button>
-            </div>
-          ) : null}
-
-          <p className="mt-6 text-center text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground">
-            {t('view.mobileHint')}
-          </p>
+      <section className="space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-white/60 bg-white/70 px-5 py-4 shadow-md backdrop-blur lg:px-6 dark:border-slate-800/70 dark:bg-slate-900/50">
+          <span className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
+            {t('view.toggleLabel')}
+          </span>
+          <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-white/80 p-1 dark:border-slate-700/60 dark:bg-slate-900/60">
+            <Button
+              size="sm"
+              variant={isGridView ? 'primary' : 'ghost'}
+              aria-pressed={isGridView}
+              onClick={() => handleViewChange('grid')}
+            >
+              {t('view.grid')}
+            </Button>
+            <Button
+              size="sm"
+              variant={!isGridView ? 'primary' : 'ghost'}
+              aria-pressed={!isGridView}
+              onClick={() => handleViewChange('table')}
+            >
+              {t('view.table')}
+            </Button>
+          </div>
         </div>
 
-        <div className="hidden lg:block">
+        {isGridView ? (
+          <div className="space-y-6">
+            <TeamGrid
+              members={gridMembers}
+              isLoading={isInitialLoading && currentPage === 1}
+              showLoadingOverlay={overlayActive}
+            />
+
+            {isError ? (
+              <p className="rounded-2xl border border-red-200/70 bg-red-50/70 px-4 py-3 text-sm font-medium text-red-700 shadow-sm dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200">
+                {t('errors.generic')}
+              </p>
+            ) : null}
+
+            {pageInfo.hasNextPage ? (
+              <div className="flex justify-center">
+                <Button
+                  variant="secondary"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={isFetching}
+                >
+                  {isFetching ? t('loading') : t('loadMore')}
+                </Button>
+              </div>
+            ) : null}
+
+            <p className="text-center text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground">
+              {t('view.mobileHint')}
+            </p>
+          </div>
+        ) : (
           <TeamTable
             data={members}
             isLoading={isInitialLoading}
             isFetching={isFetching}
+            showLoadingOverlay={overlayActive}
             isError={isError}
             onRetry={() => query.refetch(variables)}
             pageInfo={pageInfo}
             onPageChange={handlePageChange}
           />
-        </div>
+        )}
       </section>
     </div>
   );

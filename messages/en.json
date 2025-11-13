@@ -27,6 +27,7 @@
     },
     "emptyState": "No team members found",
     "loadMore": "Load more",
+    "loading": "Loading members...",
     "table": {
       "avatar": "Avatar",
       "name": "Name",
@@ -47,7 +48,10 @@
       "retry": "Try again"
     },
     "view": {
-      "mobileHint": "Switch to desktop to explore the interactive table view."
+      "mobileHint": "Use the toggle to switch between grid and table views.",
+      "grid": "Grid view",
+      "table": "Table view",
+      "toggleLabel": "Display mode"
     }
   }
 }

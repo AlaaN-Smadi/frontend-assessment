@@ -9,9 +9,10 @@ import type {TeamMember} from '../types';
 interface TeamGridProps {
   members: TeamMember[];
   isLoading: boolean;
+  showLoadingOverlay: boolean;
 }
 
-export function TeamGrid({members, isLoading}: TeamGridProps) {
+export function TeamGrid({members, isLoading, showLoadingOverlay}: TeamGridProps) {
   const t = useTranslations('teamDirectory');
 
   if (isLoading) {
@@ -36,19 +37,23 @@ export function TeamGrid({members, isLoading}: TeamGridProps) {
     );
   }
 
-  if (!members.length) {
-    return (
-      <div className="rounded-3xl border border-dashed border-border/70 px-8 py-12 text-center text-muted-foreground shadow-sm">
-        {t('emptyState')}
-      </div>
-    );
-  }
-
   return (
-    <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-      {members.map((member) => (
-        <TeamMemberCard key={member.id} member={member} />
-      ))}
+    <div className="relative">
+      <div
+        className={`${showLoadingOverlay ? 'pointer-events-none opacity-60 transition' : 'transition'}`}
+      >
+        {members.length ? (
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            {members.map((member) => (
+              <TeamMemberCard key={member.id} member={member} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-3xl border border-dashed border-border/70 px-8 py-12 text-center text-muted-foreground shadow-sm">
+            {t('emptyState')}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
