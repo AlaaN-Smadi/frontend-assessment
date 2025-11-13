@@ -1,5 +1,5 @@
 import {NextIntlClientProvider} from 'next-intl';
-import {getMessages, getTranslations, unstable_setRequestLocale} from 'next-intl/server';
+import {getMessages, getTranslations, setRequestLocale} from 'next-intl/server';
 import type {Metadata} from 'next';
 import {Inter} from 'next/font/google';
 import type {ReactNode} from 'react';
@@ -55,12 +55,12 @@ export async function generateMetadata({
 export default async function LocaleLayout({children, params}: LayoutProps) {
   const {locale} = params;
 
-  unstable_setRequestLocale(locale);
+  setRequestLocale(locale);
 
   const messages = await getMessages();
 
   return (
-    <body className={`min-h-screen bg-background ${inter.variable}`} data-locale={locale}>
+    <body className={`min-h-screen bg-background ${inter.variable}`} data-locale={locale} lang={locale}>
       <NextIntlClientProvider locale={locale} messages={messages}>
         <AppProviders>
           <div className="relative min-h-screen bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.15),transparent_55%)] dark:bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.25),rgba(2,6,23,0.9)_60%)]">

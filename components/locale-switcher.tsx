@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue
 } from './ui/select';
+import type { Route } from 'next';
 
 const supportedLocales = [
   {value: 'en', label: 'English'},
@@ -31,8 +32,10 @@ export function LocaleSwitcher() {
       ? `/${nextLocale}/${pathWithoutLocale}`
       : `/${nextLocale}`;
     const queryString = searchParams.toString();
-
-    router.replace(`${nextPath}${queryString ? `?${queryString}` : ''}`);
+    
+    const newPath = `${nextPath}${queryString ? `?${queryString}` : ''}` as Route;
+    router.replace(newPath);
+    router.refresh();
   };
 
   return (

@@ -8,6 +8,7 @@ import {useLocale, useTranslations} from "next-intl";
 import {cn} from "../../src/lib/utils";
 import {LocaleSwitcher} from "../locale-switcher";
 import {ThemeToggle} from "../theme-toggle";
+import type { Route } from "next";
 
 const NAV_ITEMS = [{href: "/team-directory", translationKey: "teamDirectory"}] as const;
 
@@ -36,7 +37,7 @@ export function SiteHeader() {
             return (
               <Link
                 key={item.href}
-                href={href}
+                href={href as Route}
                 className={cn(
                   "relative transition hover:text-foreground",
                   isActive && "text-foreground"
