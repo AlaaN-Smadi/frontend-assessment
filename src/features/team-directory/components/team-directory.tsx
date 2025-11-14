@@ -14,6 +14,7 @@ import {TeamGrid} from './team-grid';
 import {TeamFilters} from './team-filters';
 import {TeamTable} from './team-table';
 import {useTeamMembers} from '../hooks/use-team-members';
+import LocaleLoading from '../../../../components/ui/loading';
 
 const ROLE_QUERY_MAP: Record<string, RoleFilter> = {
   all: 'ALL',
@@ -323,6 +324,11 @@ export function TeamDirectory() {
 
   return (
     <div className="space-y-10">
+      {
+        isInitialLoading ?
+        <LocaleLoading /> : null
+      }
+      
       <section className="relative overflow-hidden rounded-3xl border border-white/60 bg-white/80 p-8 shadow-2xl shadow-blue-500/10 backdrop-blur-2xl transition dark:border-slate-800/80 dark:bg-slate-900/70 dark:shadow-black/30 sm:p-10">
         <div className="pointer-events-none absolute -left-24 top-4 h-72 w-72 rounded-full bg-blue-500/20 blur-3xl dark:bg-blue-500/25" />
         <div className="pointer-events-none absolute -right-12 -bottom-6 h-80 w-80 rounded-full bg-cyan-400/25 blur-3xl dark:bg-cyan-500/20" />
