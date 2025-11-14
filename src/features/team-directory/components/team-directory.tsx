@@ -413,9 +413,6 @@ export function TeamDirectory() {
               </div>
             ) : null}
 
-            <p className="text-center text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground">
-              {t('view.mobileHint')}
-            </p>
           </div>
         ) : (
           <TeamTable

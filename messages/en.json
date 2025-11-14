@@ -48,7 +48,6 @@
       "retry": "Try again"
     },
     "view": {
-      "mobileHint": "Use the toggle to switch between grid and table views.",
       "grid": "Grid view",
       "table": "Table view",
       "toggleLabel": "Display mode"
