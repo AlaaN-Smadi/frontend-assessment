@@ -4,15 +4,16 @@ const locales = ['en', 'ar'] as const;
 
 export type AppLocale = (typeof locales)[number];
 
-export default getRequestConfig(async ({locale}) => {
-  if (!locales.includes(locale as AppLocale)) {
-    throw new Error(`Unsupported locale: ${locale}`);
+export default getRequestConfig(async ({requestLocale}) => {
+  const requested = await requestLocale;
+  if (!locales.includes(requested as AppLocale)) {
+    throw new Error(`Unsupported locale: ${requested}`);
   }
 
-  const messages = (await import(`../../messages/${locale}.json`)).default;
+  const messages = (await import(`../../messages/${requested}.json`)).default;
 
   return {
-    locale,
+    locale: requested,
     messages
   };
 });
