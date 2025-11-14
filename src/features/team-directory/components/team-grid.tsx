@@ -3,6 +3,7 @@
 import {SortAsc, SortDesc} from 'lucide-react';
 import {useTranslations} from 'next-intl';
 import {useMemo} from 'react';
+import { motion } from "framer-motion";
 
 import {Skeleton} from '../../../../components/ui/skeleton';
 import {
@@ -37,6 +38,22 @@ export function TeamGrid({members, isLoading, showLoadingOverlay}: TeamGridProps
   const sortBy = useTeamDirectoryStore((state) => state.sortBy);
   const sortOrder = useTeamDirectoryStore((state) => state.sortOrder);
   const setSort = useTeamDirectoryStore((state) => state.setSort);
+  
+  const containerAnimation = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.1
+      }
+    }
+  };
+  
+  const cardAnimation = {
+    hidden: { opacity: 0, y: 15 },
+    show: { opacity: 1, y: 0 }
+  };
 
   const options = useMemo(
     () => {
@@ -131,11 +148,19 @@ export function TeamGrid({members, isLoading, showLoadingOverlay}: TeamGridProps
         className={`${showLoadingOverlay ? 'pointer-events-none opacity-60 transition' : 'transition'}`}
       >
         {members.length ? (
-          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {members.map((member) => (
-              <TeamMemberCard key={member.id} member={member} />
+          <motion.div
+            variants={containerAnimation}
+            initial="hidden"
+            animate="show"
+            className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            {members.map((member, i) => (
+              <motion.div
+                key={i}
+                variants={cardAnimation}>
+                <TeamMemberCard key={member.id} member={member} />
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         ) : (
           <div className="rounded-3xl border border-dashed border-border/70 px-8 py-12 text-center text-muted-foreground shadow-sm">
             {t('emptyState')}

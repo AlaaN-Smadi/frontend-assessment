@@ -15,6 +15,7 @@ import {TeamFilters} from './team-filters';
 import {TeamTable} from './team-table';
 import {useTeamMembers} from '../hooks/use-team-members';
 import LocaleLoading from '../../../../components/ui/loading';
+import Typewriter from '../../../../components/animations/Typewriter';
 
 const ROLE_QUERY_MAP: Record<string, RoleFilter> = {
   all: 'ALL',
@@ -339,30 +340,12 @@ export function TeamDirectory() {
               {t('hero.chip')}
             </span>
             <div className="space-y-4">
-              <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-                {t('hero.title')}
-              </h1>
+              
+              <Typewriter text={t('hero.title')} speed={40} className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl" />
+
               <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
                 {t('hero.subtitle')}
               </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center gap-3 rounded-2xl border border-blue-200/70 bg-white/70 px-4 py-3 text-sm shadow-md dark:border-blue-500/40 dark:bg-blue-500/10">
-                <span className="text-3xl font-bold text-foreground">
-                  {totalMembers > 0 ? totalMembers : '—'}
-                </span>
-                <span className="text-sm font-semibold text-muted-foreground">
-                  {t('hero.stats.members', {count: totalMembers})}
-                </span>
-              </div>
-              <div className="flex items-center gap-3 rounded-2xl border border-slate-200/70 bg-white/70 px-4 py-3 text-sm shadow-md dark:border-slate-700/60 dark:bg-slate-900/60">
-                <span className="text-2xl font-semibold text-foreground">
-                  {uniqueRoles > 0 ? uniqueRoles : '—'}
-                </span>
-                <span className="text-sm font-semibold text-muted-foreground">
-                  {t('hero.stats.roles', {count: uniqueRoles})}
-                </span>
-              </div>
             </div>
           </div>
 
