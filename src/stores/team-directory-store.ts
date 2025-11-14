@@ -40,37 +40,37 @@ export const useTeamDirectoryStore = create<TeamDirectoryStore>((set) => ({
   totalItems: 0,
   sortBy: 'NAME',
   sortOrder: 'ASC',
-  setSearchTerm: (value) =>
+  setSearchTerm: (value: string) =>
     set({
       searchTerm: value,
       currentPage: 1
     }),
-  setRole: (role) =>
+  setRole: (role: RoleFilter) =>
     set({
       role,
       currentPage: 1
     }),
-  setPage: (page) =>
+  setPage: (page: number) =>
     set({
       currentPage: page
     }),
-  setLimit: (limit) =>
+  setLimit: (limit: number) =>
     set({
       limit,
       currentPage: 1
     }),
-  setSort: (sortBy, sortOrder) =>
+  setSort: (sortBy: SortField, sortOrder: SortOrder) =>
     set({
       sortBy,
       sortOrder,
       currentPage: 1
     }),
-  unsafeHydrate: (payload) =>
-    set((state) => ({
+  unsafeHydrate: (payload: Partial<TeamDirectoryState>) =>
+    set((state: TeamDirectoryState) => ({
       ...state,
       ...payload
     })),
-  setPagination: ({totalPages, totalItems}) =>
+  setPagination: ({totalPages, totalItems}: {totalPages: number; totalItems: number}) =>
     set({
       totalPages,
       totalItems

@@ -9,7 +9,7 @@ import {usePathname, useRouter, useSearchParams} from 'next/navigation';
 import {Button} from '../../../../components/ui/button';
 import {useDebouncedValue} from '../../../hooks/use-debounced-value';
 import {useTeamDirectoryStore} from '../../../stores/team-directory-store';
-import type {RoleFilter, SortField, SortOrder} from '../../../stores/team-directory-store';
+import type {RoleFilter, SortField, SortOrder, TeamDirectoryStore} from '../../../stores/team-directory-store';
 import {TeamGrid} from './team-grid';
 import {TeamFilters} from './team-filters';
 import {TeamTable} from './team-table';
@@ -42,18 +42,18 @@ export function TeamDirectory() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const searchTerm = useTeamDirectoryStore((state) => state.searchTerm);
-  const role = useTeamDirectoryStore((state) => state.role);
-  const currentPage = useTeamDirectoryStore((state) => state.currentPage);
-  const limit = useTeamDirectoryStore((state) => state.limit);
-  const sortBy = useTeamDirectoryStore((state) => state.sortBy);
-  const sortOrder = useTeamDirectoryStore((state) => state.sortOrder);
-  const setSearchTerm = useTeamDirectoryStore((state) => state.setSearchTerm);
-  const setRole = useTeamDirectoryStore((state) => state.setRole);
-  const setPage = useTeamDirectoryStore((state) => state.setPage);
-  const setPagination = useTeamDirectoryStore((state) => state.setPagination);
-  const resetFilters = useTeamDirectoryStore((state) => state.resetFilters);
-  const unsafeHydrate = useTeamDirectoryStore((state) => state.unsafeHydrate);
+  const searchTerm = useTeamDirectoryStore((state: TeamDirectoryStore) => state.searchTerm);
+  const role = useTeamDirectoryStore((state: TeamDirectoryStore) => state.role);
+  const currentPage = useTeamDirectoryStore((state: TeamDirectoryStore) => state.currentPage);
+  const limit = useTeamDirectoryStore((state: TeamDirectoryStore) => state.limit);
+  const sortBy = useTeamDirectoryStore((state: TeamDirectoryStore) => state.sortBy);
+  const sortOrder = useTeamDirectoryStore((state: TeamDirectoryStore) => state.sortOrder);
+  const setSearchTerm = useTeamDirectoryStore((state: TeamDirectoryStore) => state.setSearchTerm);
+  const setRole = useTeamDirectoryStore((state: TeamDirectoryStore) => state.setRole);
+  const setPage = useTeamDirectoryStore((state: TeamDirectoryStore) => state.setPage);
+  const setPagination = useTeamDirectoryStore((state: TeamDirectoryStore) => state.setPagination);
+  const resetFilters = useTeamDirectoryStore((state: TeamDirectoryStore) => state.resetFilters);
+  const unsafeHydrate = useTeamDirectoryStore((state: TeamDirectoryStore) => state.unsafeHydrate);
 
   const hasSyncedFromQuery = useRef(false);
   const lastQueryRef = useRef('');
@@ -199,17 +199,6 @@ export function TeamDirectory() {
     query.networkStatus === NetworkStatus.refetch ||
     query.networkStatus === NetworkStatus.setVariables;
   const isError = Boolean(query.error);
-
-  const totalMembers =
-    pageInfo.totalItems ||
-    query.data?.teamMembers.pageInfo?.totalItems ||
-    members.length ||
-    gridMembers.length ||
-    0;
-
-  const uniqueRoles = new Set(
-    [...members, ...gridMembers].map((member) => member.role)
-  ).size;
 
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout> | undefined;
