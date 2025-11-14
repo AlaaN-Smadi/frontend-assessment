@@ -8,8 +8,6 @@ export interface TeamMemberRecord {
   avatar: string;
 }
 
-const AVATAR_BASE = 'https://api.dicebear.com/7.x/initials/png?seed=';
-
 const makeMember = (
   id: number,
   name: string,
