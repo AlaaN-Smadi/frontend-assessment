@@ -4,14 +4,35 @@
 
 Your task is to build a **"Team Directory"** feature that displays a **paginated, filterable list of team members**.
 
-- ✅ **Implementation status:** A Next.js 14 App Router project has been scaffolded with TypeScript, Tailwind (including RTL support), next-intl, Apollo Client (backed by a mock GraphQL API), Zustand, and TanStack Table. The `/team-directory` route delivers the required filtering, sorting, pagination, and responsive UI.
+- ✅ **Implementation status:** A Next.js 13 App Router project has been scaffolded with TypeScript, Tailwind (including RTL support), next-intl, Apollo Client (backed by a mock GraphQL API), Zustand, and TanStack Table. The `/team-directory` route delivers the required filtering, sorting, pagination, and responsive UI.
 - 🚀 **Run locally:**
   ```bash
+  <!-- recommended node version: 20 -->
   npm install
   npm run dev
   ```
   Then open `http://localhost:3000`.
 - 🌐 **Available locales:** English (`/en`) and Arabic (`/ar`). Navigation automatically redirects to the default locale.
+
+## Project Structure
+
+```text
+frontend-assessment/
+├── app/                    # Next.js routing entrypoint, locales, and API routes
+│   ├── api/graphql/route.ts
+│   ├── [locale]/team-directory/page.tsx
+│   ├── globals.css
+│   └── layout.tsx
+├── components/             # Shared UI primitives, layout, and providers
+├── messages/               # next-intl dictionaries for each locale
+├── public/                 # Static assets (images, icons)
+├── src/
+│   ├── features/team-directory/  # GraphQL ops, hooks, and UI for the feature
+│   ├── hooks/                    # Cross-cutting hooks (debounced input, etc.)
+│   ├── server/graphql/           # Mock schema & resolvers powering Apollo
+│   └── stores/                   # Zustand stores for filters + pagination
+└── tailwind.config.ts, tsconfig.json, etc.
+```
 
 - **Estimated Time:** 6–10 hours (spread over 2–3 days)  
 - **Difficulty:** Intermediate  
