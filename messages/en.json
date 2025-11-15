@@ -1,6 +1,7 @@
 {
   "common": {
-    "appName": "Team Directory"
+    "appName": "Team Directory",
+    "skipToContent": "Skip to main content"
   },
   "navigation": {
     "teamDirectory": "Team Directory"
@@ -58,6 +59,14 @@
       "nameDesc": "Name (Z–A)",
       "roleAsc": "Role (A–Z)",
       "roleDesc": "Role (Z–A)"
+    },
+    "shortcuts": {
+      "title": "Keyboard navigation",
+      "search": "Focus search",
+      "grid": "Show grid view",
+      "table": "Show table view",
+      "prevPage": "Previous page",
+      "nextPage": "Next page"
     }
   }
 }

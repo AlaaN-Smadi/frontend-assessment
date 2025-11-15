@@ -3,7 +3,7 @@
 import {NetworkStatus} from '@apollo/client';
 import type {Route} from 'next';
 import {useTranslations} from 'next-intl';
-import {useEffect, useMemo, useRef, useState} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {usePathname, useRouter, useSearchParams} from 'next/navigation';
 
 import {Button} from '../../../../components/ui/button';
@@ -79,6 +79,10 @@ export function TeamDirectory() {
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const userSelectedView = useRef(false);
   const filterKeyRef = useRef<string>('');
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const gridToggleRef = useRef<HTMLButtonElement | null>(null);
+  const tableToggleRef = useRef<HTMLButtonElement | null>(null);
+  const [primaryModifierKey, setPrimaryModifierKey] = useState<'Ctrl' | 'Cmd'>('Ctrl');
 
   const members = query.data?.teamMembers.nodes ?? [];
   const pageInfo = query.data?.teamMembers.pageInfo ?? {
@@ -99,6 +103,16 @@ export function TeamDirectory() {
     if (storedView === 'grid' || storedView === 'table') {
       userSelectedView.current = true;
       setViewMode(storedView);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof navigator === 'undefined') {
+      return;
+    }
+
+    if (/Mac|iPod|iPhone|iPad/.test(navigator.platform)) {
+      setPrimaryModifierKey('Cmd');
     }
   }, []);
 
@@ -182,17 +196,20 @@ export function TeamDirectory() {
     sortOrder
   ]);
 
-  const handlePageChange = (nextPage: number) => {
-    if (nextPage < 1 || nextPage === currentPage) {
-      return;
-    }
+  const handlePageChange = useCallback(
+    (nextPage: number) => {
+      if (nextPage < 1 || nextPage === currentPage) {
+        return;
+      }
 
-    if (pageInfo.totalPages && nextPage > pageInfo.totalPages) {
-      return;
-    }
+      if (pageInfo.totalPages && nextPage > pageInfo.totalPages) {
+        return;
+      }
 
-    setPage(nextPage);
-  };
+      setPage(nextPage);
+    },
+    [currentPage, pageInfo.totalPages, setPage]
+  );
 
   const isInitialLoading = query.networkStatus === NetworkStatus.loading;
   const isFetching =
@@ -218,13 +235,13 @@ export function TeamDirectory() {
     };
   }, [isFetching]);
 
-  const handleViewChange = (mode: 'grid' | 'table') => {
+  const handleViewChange = useCallback((mode: 'grid' | 'table') => {
     userSelectedView.current = true;
     setViewMode(mode);
     if (typeof window !== 'undefined') {
       window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode);
     }
-  };
+  }, []);
 
   const overlayActive = showFetchingOverlay || isFetching;
   const isGridView = viewMode === 'grid';
@@ -312,6 +329,90 @@ export function TeamDirectory() {
     router.replace(`${pathname}${query}` as Route, {scroll: false});
   }, [pathname, role, router, searchParams, searchTerm, sortBy, sortOrder]);
 
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const isEditableTarget =
+        target?.isContentEditable ||
+        ['INPUT', 'TEXTAREA', 'SELECT'].includes(target?.tagName ?? '') ||
+        (target?.getAttribute('role') === 'textbox' ?? false);
+
+      const focusSearch = () => {
+        if (searchInputRef.current) {
+          searchInputRef.current.focus();
+          searchInputRef.current.select();
+        }
+      };
+
+      const key = event.key.toLowerCase();
+
+      if (
+        ((key === '/' && !event.metaKey && !event.ctrlKey && !event.altKey) ||
+          (key === 'k' && (event.metaKey || event.ctrlKey))) &&
+        (!isEditableTarget || target === searchInputRef.current)
+      ) {
+        event.preventDefault();
+        focusSearch();
+        return;
+      }
+
+      if (!isEditableTarget && !event.altKey && !event.metaKey && !event.ctrlKey) {
+        if (key === 'g') {
+          event.preventDefault();
+          handleViewChange('grid');
+          gridToggleRef.current?.focus();
+          return;
+        }
+
+        if (key === 't') {
+          event.preventDefault();
+          handleViewChange('table');
+          tableToggleRef.current?.focus();
+          return;
+        }
+      }
+
+      if (event.altKey && !event.metaKey && !event.ctrlKey) {
+        if (event.key === 'ArrowRight') {
+          event.preventDefault();
+          if (pageInfo.hasNextPage && !overlayActive) {
+            handlePageChange(currentPage + 1);
+          }
+        } else if (event.key === 'ArrowLeft') {
+          event.preventDefault();
+          if (pageInfo.hasPreviousPage && currentPage > 1 && !overlayActive) {
+            handlePageChange(currentPage - 1);
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleShortcut);
+    return () => window.removeEventListener('keydown', handleShortcut);
+  }, [
+    currentPage,
+    handlePageChange,
+    handleViewChange,
+    overlayActive,
+    pageInfo.hasNextPage,
+    pageInfo.hasPreviousPage
+  ]);
+
+  const keyboardShortcuts = useMemo(
+    () => [
+      {
+        id: 'search',
+        keys: ['/', `${primaryModifierKey} + K`],
+        label: t('shortcuts.search')
+      },
+      {id: 'grid', keys: ['G'], label: t('shortcuts.grid')},
+      {id: 'table', keys: ['T'], label: t('shortcuts.table')},
+      {id: 'prev', keys: ['Alt + Left'], label: t('shortcuts.prevPage')},
+      {id: 'next', keys: ['Alt + Right'], label: t('shortcuts.nextPage')}
+    ],
+    [primaryModifierKey, t]
+  );
+
   return (
     <div className="space-y-10">
       {
@@ -358,7 +459,7 @@ export function TeamDirectory() {
         </div>
 
         <div className="relative mt-8">
-          <TeamFilters />
+          <TeamFilters searchInputRef={searchInputRef} />
         </div>
       </section>
 
@@ -369,6 +470,7 @@ export function TeamDirectory() {
           </span>
           <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-white/80 p-1 dark:border-slate-700/60 dark:bg-slate-900/60">
             <Button
+              ref={gridToggleRef}
               size="sm"
               variant={isGridView ? 'primary' : 'ghost'}
               aria-pressed={isGridView}
@@ -377,6 +479,7 @@ export function TeamDirectory() {
               {t('view.grid')}
             </Button>
             <Button
+              ref={tableToggleRef}
               size="sm"
               variant={!isGridView ? 'primary' : 'ghost'}
               aria-pressed={!isGridView}
@@ -384,6 +487,29 @@ export function TeamDirectory() {
             >
               {t('view.table')}
             </Button>
+          </div>
+        </div>
+        <div className="rounded-3xl border border-dashed border-white/60 bg-white/70 px-5 py-4 text-xs text-muted-foreground shadow-sm dark:border-slate-800/70 dark:bg-slate-900/40">
+          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-muted-foreground">
+            {t('shortcuts.title')}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-4">
+            {keyboardShortcuts.map((shortcut) => (
+              <div key={shortcut.id} className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-1">
+                  {shortcut.keys.map((key) => (
+                    <span key={`${shortcut.id}-${key}`} className="flex items-center gap-1">
+                      <kbd className="rounded-md border border-border/80 bg-white/90 px-2 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-foreground shadow-sm dark:border-slate-700/70 dark:bg-slate-900/60">
+                        {key}
+                      </kbd>
+                    </span>
+                  ))}
+                </div>
+                <span className="text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">
+                  {shortcut.label}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 

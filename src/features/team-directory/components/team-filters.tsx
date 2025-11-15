@@ -3,7 +3,7 @@
 import {Label} from '@radix-ui/react-label';
 import {Search} from 'lucide-react';
 import {useTranslations} from 'next-intl';
-import {useCallback} from 'react';
+import {useCallback, type RefObject} from 'react';
 
 import {Button} from '../../../../components/ui/button';
 import {Input} from '../../../../components/ui/input';
@@ -18,7 +18,11 @@ import {useTeamDirectoryStore} from '../../../stores/team-directory-store';
 
 const ROLE_OPTIONS = ['ALL', 'ADMIN', 'AGENT', 'CREATOR'] as const;
 
-export function TeamFilters() {
+type TeamFiltersProps = {
+  searchInputRef?: RefObject<HTMLInputElement>;
+};
+
+export function TeamFilters({searchInputRef}: TeamFiltersProps) {
   const tFilters = useTranslations('teamDirectory.filters');
   const tRoles = useTranslations('teamDirectory.roles');
 
@@ -55,6 +59,7 @@ export function TeamFilters() {
               onChange={(event) => setSearchTerm(event.target.value)}
               placeholder={tFilters('searchPlaceholder')}
               className="h-12 rounded-full border border-transparent bg-white/80 ps-11 text-sm shadow-inner shadow-blue-500/5 transition focus:border-blue-400 focus:bg-white focus-visible:ring-blue-500 dark:bg-slate-900/70"
+              ref={searchInputRef}
             />
           </div>
         </div>

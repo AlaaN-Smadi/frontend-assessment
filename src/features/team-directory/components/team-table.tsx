@@ -1,5 +1,6 @@
 'use client';
 
+import {useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent} from 'react';
 import {useTranslations} from 'next-intl';
 import {
   type ColumnDef,
@@ -59,6 +60,8 @@ export function TeamTable({
   const sortBy = useTeamDirectoryStore((state) => state.sortBy);
   const sortOrder = useTeamDirectoryStore((state) => state.sortOrder);
   const setSort = useTeamDirectoryStore((state) => state.setSort);
+  const rowRefs = useRef<Array<HTMLTableRowElement | null>>([]);
+  const [focusedRow, setFocusedRow] = useState(0);
 
   const columns: ColumnDef<TeamMember>[] = [
     {
@@ -157,6 +160,70 @@ export function TeamTable({
   });
 
   const showOverlay = showLoadingOverlay && !isLoading;
+  const rows = table.getRowModel().rows;
+  const rowCount = rows.length;
+
+  useEffect(() => {
+    if (!rowCount) {
+      setFocusedRow(0);
+      return;
+    }
+
+    if (focusedRow >= rowCount) {
+      setFocusedRow(rowCount - 1);
+    }
+  }, [focusedRow, rowCount]);
+
+  rowRefs.current = rowRefs.current.slice(0, rowCount);
+
+  const focusRow = (index: number) => {
+    if (!rowCount) {
+      return;
+    }
+
+    const nextIndex = Math.min(Math.max(index, 0), rowCount - 1);
+    const target = rowRefs.current[nextIndex];
+    if (target) {
+      setFocusedRow(nextIndex);
+      target.focus();
+    }
+  };
+
+  const handleRowKeyDown = (event: ReactKeyboardEvent<HTMLTableRowElement>, rowIndex: number) => {
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        focusRow(rowIndex + 1);
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        focusRow(rowIndex - 1);
+        break;
+      case 'Home':
+        event.preventDefault();
+        focusRow(0);
+        break;
+      case 'End':
+        event.preventDefault();
+        focusRow(rowCount - 1);
+        break;
+      case 'Enter':
+      case ' ':
+        {
+          const emailLink = rowRefs.current[rowIndex]?.querySelector<HTMLAnchorElement>(
+            'a[href^=\"mailto:\"]'
+          );
+          if (emailLink) {
+            event.preventDefault();
+            emailLink.focus();
+            emailLink.click();
+          }
+        }
+        break;
+      default:
+        break;
+    }
+  };
 
   return (
     <div className="glass-panel relative overflow-hidden">
@@ -192,22 +259,45 @@ export function TeamTable({
             <thead className="bg-gradient-to-r from-blue-500/10 via-cyan-500/10 to-transparent">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id} className="text-left text-sm text-muted-foreground">
-                  {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      className={cn(
-                        'px-6 py-4 align-middle',
-                        header.column.getCanSort()
-                          ? 'cursor-pointer select-none transition hover:text-blue-600'
-                          : ''
-                      )}
-                      onClick={header.column.getToggleSortingHandler()}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
-                    </th>
-                  ))}
+                  {headerGroup.headers.map((header) => {
+                    const canSort = header.column.getCanSort();
+                    const sortState = header.column.getIsSorted();
+
+                    return (
+                      <th
+                        key={header.id}
+                        scope="col"
+                        className={cn(
+                          'px-6 py-4 align-middle',
+                          canSort ? 'cursor-pointer select-none transition hover:text-blue-600' : ''
+                        )}
+                        onClick={header.column.getToggleSortingHandler()}
+                        tabIndex={canSort ? 0 : undefined}
+                        aria-sort={
+                          canSort
+                            ? sortState === 'asc'
+                              ? 'ascending'
+                              : sortState === 'desc'
+                                ? 'descending'
+                                : 'none'
+                            : undefined
+                        }
+                        onKeyDown={(event) => {
+                          if (!canSort) {
+                            return;
+                          }
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            header.column.toggleSorting();
+                          }
+                        }}
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(header.column.columnDef.header, header.getContext())}
+                      </th>
+                    );
+                  })}
                 </tr>
               ))}
             </thead>
@@ -230,7 +320,7 @@ export function TeamTable({
                       </td>
                     </tr>
                   ))
-                : table.getRowModel().rows.map((row, rowIndex) => (
+                : rows.map((row, rowIndex) => (
                     <tr
                       key={row.id}
                       className={cn(
@@ -240,6 +330,12 @@ export function TeamTable({
                           : 'bg-white/40 dark:bg-slate-900/30',
                         'hover:-translate-y-[1px] hover:bg-blue-50/60 hover:shadow-lg hover:shadow-blue-500/20 dark:hover:bg-slate-800/50'
                       )}
+                      ref={(element) => {
+                        rowRefs.current[rowIndex] = element;
+                      }}
+                      tabIndex={rowIndex === focusedRow ? 0 : -1}
+                      onFocus={() => setFocusedRow(rowIndex)}
+                      onKeyDown={(event) => handleRowKeyDown(event, rowIndex)}
                     >
                       {row.getVisibleCells().map((cell) => (
                         <td key={cell.id} className="px-6 py-5 align-middle">

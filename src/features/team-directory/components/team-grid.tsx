@@ -2,8 +2,14 @@
 
 import {SortAsc, SortDesc} from 'lucide-react';
 import {useTranslations} from 'next-intl';
-import {useMemo} from 'react';
-import { motion } from "framer-motion";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent
+} from 'react';
+import {motion} from 'framer-motion';
 
 import {Skeleton} from '../../../../components/ui/skeleton';
 import {
@@ -38,6 +44,8 @@ export function TeamGrid({members, isLoading, showLoadingOverlay}: TeamGridProps
   const sortBy = useTeamDirectoryStore((state) => state.sortBy);
   const sortOrder = useTeamDirectoryStore((state) => state.sortOrder);
   const setSort = useTeamDirectoryStore((state) => state.setSort);
+  const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const [gridColumns, setGridColumns] = useState(1);
   
   const containerAnimation = {
     hidden: { opacity: 0 },
@@ -84,6 +92,71 @@ export function TeamGrid({members, isLoading, showLoadingOverlay}: TeamGridProps
   }, [options]);
 
   const selectedValue = `${sortBy}-${sortOrder}` as SortValue;
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const determineColumns = () => {
+      if (window.innerWidth >= 1280) {
+        setGridColumns(3);
+      } else if (window.innerWidth >= 640) {
+        setGridColumns(2);
+      } else {
+        setGridColumns(1);
+      }
+    };
+
+    determineColumns();
+    window.addEventListener('resize', determineColumns);
+    return () => {
+      window.removeEventListener('resize', determineColumns);
+    };
+  }, []);
+
+  const handleCardKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>, index: number) => {
+    if (!members.length) {
+      return;
+    }
+
+    const isRtl = typeof document !== 'undefined' && document.dir === 'rtl';
+
+    let nextIndex = -1;
+
+    switch (event.key) {
+      case 'ArrowRight':
+        nextIndex = index + (isRtl ? -1 : 1);
+        break;
+      case 'ArrowLeft':
+        nextIndex = index + (isRtl ? 1 : -1);
+        break;
+      case 'ArrowDown':
+        nextIndex = index + gridColumns;
+        break;
+      case 'ArrowUp':
+        nextIndex = index - gridColumns;
+        break;
+      case 'Home':
+        nextIndex = 0;
+        break;
+      case 'End':
+        nextIndex = members.length - 1;
+        break;
+      default:
+        return;
+    }
+
+    if (nextIndex < 0 || nextIndex >= members.length) {
+      return;
+    }
+
+    event.preventDefault();
+    const nextCard = cardRefs.current[nextIndex];
+    nextCard?.focus();
+  };
+
+  cardRefs.current = cardRefs.current.slice(0, members.length);
 
   if (isLoading) {
     return (
@@ -152,12 +225,19 @@ export function TeamGrid({members, isLoading, showLoadingOverlay}: TeamGridProps
             variants={containerAnimation}
             initial="hidden"
             animate="show"
-            className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3"
+            role="grid"
+            aria-live="polite"
+          >
             {members.map((member, i) => (
-              <motion.div
-                key={i}
-                variants={cardAnimation}>
-                <TeamMemberCard key={member.id} member={member} />
+              <motion.div key={member.id} variants={cardAnimation} role="presentation">
+                <TeamMemberCard
+                  member={member}
+                  ref={(element) => {
+                    cardRefs.current[i] = element;
+                  }}
+                  onKeyDown={(event) => handleCardKeyDown(event, i)}
+                />
               </motion.div>
             ))}
           </motion.div>
@@ -170,4 +250,3 @@ export function TeamGrid({members, isLoading, showLoadingOverlay}: TeamGridProps
     </div>
   );
 }
-
