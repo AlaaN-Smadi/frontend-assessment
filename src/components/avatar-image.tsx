@@ -33,6 +33,7 @@ export function AvatarImage({src, alt, size, className, imageClassName}: AvatarI
         src={showFallback ? fallbackSrc : src}
         alt={alt}
         fill
+        unoptimized
         sizes={`${size}px`}
         className={cn('object-cover', imageClassName)}
         onError={() => setShowFallback(true)}
