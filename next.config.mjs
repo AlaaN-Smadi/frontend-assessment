@@ -16,6 +16,12 @@ const nextConfig = {
         hostname: 'randomuser.me',
         port: "",
         pathname: "/**",
+      },
+      {
+        protocol: 'https',
+        hostname: 'frontend-assessment-8uuw.onrender.com',
+        port: "",
+        pathname: "/**",
       }
     ],
     dangerouslyAllowSVG: true,
