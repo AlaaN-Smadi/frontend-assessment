@@ -4,6 +4,8 @@
 
 Your task is to build a **"Team Directory"** feature that displays a **paginated, filterable list of team members**.
 
+**==The total time spent on this assessment was around 7 hours, including development, testing, and preparing the demo.==**
+
 - ✅ **Implementation status:** A Next.js 13 App Router project has been scaffolded with TypeScript, Tailwind (including RTL support), next-intl, Apollo Client (backed by a mock GraphQL API), Zustand, and TanStack Table. The `/team-directory` route delivers the required filtering, sorting, pagination, and responsive UI.
 - [Live Demo](https://frontend-assessment-8uuw.onrender.com)
 - 🚀 **Run locally:**
@@ -34,6 +36,13 @@ frontend-assessment/
 │   └── stores/                   # Zustand stores for filters + pagination
 └── tailwind.config.ts, tsconfig.json, etc.
 ```
+
+## Design Decisions
+
+- **Design system**: Tailwind CSS and Radix primitives keeps styling expressive while inheriting accessible focus management and consistent spacing tokens.
+- **Mocked GraphQL layer**: A colocated Apollo Server handler under `/api/graphql` unblocks the UI and mirrors the contract expected from a future backend, enabling Apollo Client + typed operations without external dependencies.
+- **Global state**: A single Zustand store owns filters, pagination, and sorting so the grid, table, and controls stay in sync and URL-free state remains predictable.
+- **Experience toggles**: Wrapped the layout in next-intl and a bespoke theme provider so locale changes, RTL support, and light/dark persistence happen at the shell level without prop drilling.
 
 - **Estimated Time:** 6–10 hours (spread over 2–3 days)  
 - **Difficulty:** Intermediate  
