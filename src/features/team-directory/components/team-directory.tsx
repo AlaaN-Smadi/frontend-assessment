@@ -335,7 +335,8 @@ export function TeamDirectory() {
       const isEditableTarget =
         target?.isContentEditable ||
         ['INPUT', 'TEXTAREA', 'SELECT'].includes(target?.tagName ?? '') ||
-        (target?.getAttribute('role') === 'textbox' ?? false);
+        target?.getAttribute('role') === 'textbox';
+
 
       const focusSearch = () => {
         if (searchInputRef.current) {
