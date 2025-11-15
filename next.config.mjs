@@ -5,6 +5,7 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  trailingSlash: true,
   experimental: {
     typedRoutes: true
   },
@@ -12,9 +13,13 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'randomuser.me'
+        hostname: 'randomuser.me',
+        port: "",
+        pathname: "/**",
       }
-    ]
+    ],
+    dangerouslyAllowSVG: true,
+    formats: ["image/avif", "image/webp"],
   }
 };
 
